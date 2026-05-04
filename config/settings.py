@@ -1,7 +1,7 @@
 from pathlib import Path
 import os
-from urllib.parse import urlparse
 
+import dj_database_url
 from dotenv import load_dotenv
 
 
@@ -11,6 +11,11 @@ load_dotenv(BASE_DIR / ".env")
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-only-secret-key")
 DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
 ALLOWED_HOSTS = [host.strip() for host in os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if host.strip()]
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "http://localhost,http://127.0.0.1").split(",")
+    if origin.strip()
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -56,23 +61,10 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 
-def database_from_url(url):
-    parsed = urlparse(url)
-    if parsed.scheme not in {"postgres", "postgresql"}:
-        raise ValueError("Only PostgreSQL DATABASE_URL values are supported.")
-    return {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": parsed.path.lstrip("/"),
-        "USER": parsed.username or "",
-        "PASSWORD": parsed.password or "",
-        "HOST": parsed.hostname or "",
-        "PORT": str(parsed.port or ""),
-    }
-
-
 database_url = os.getenv("DATABASE_URL")
+database_ssl_require = os.getenv("DATABASE_SSL_REQUIRE", "False").lower() == "true"
 DATABASES = {
-    "default": database_from_url(database_url)
+    "default": dj_database_url.parse(database_url, conn_max_age=600, ssl_require=database_ssl_require)
     if database_url
     else {
         "ENGINE": "django.db.backends.sqlite3",
@@ -106,3 +98,8 @@ LOGOUT_REDIRECT_URL = "home"
 
 QUESTION_GENERATOR_PROVIDER = os.getenv("QUESTION_GENERATOR_PROVIDER", "local")
 QUESTION_GENERATOR_API_KEY = os.getenv("QUESTION_GENERATOR_API_KEY", "")
+
+SECURE_SSL_REDIRECT = os.getenv("DJANGO_SECURE_SSL_REDIRECT", "False").lower() == "true"
+SESSION_COOKIE_SECURE = os.getenv("DJANGO_SESSION_COOKIE_SECURE", "False").lower() == "true"
+CSRF_COOKIE_SECURE = os.getenv("DJANGO_CSRF_COOKIE_SECURE", "False").lower() == "true"
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

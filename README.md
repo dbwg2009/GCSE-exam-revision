@@ -31,6 +31,17 @@ python manage.py runserver
 
 By default the project uses SQLite for local development. Set `DATABASE_URL` to a PostgreSQL URL when deploying or developing against Postgres.
 
+For production, set at least:
+
+```bash
+DJANGO_DEBUG=False
+DJANGO_ALLOWED_HOSTS=10c.edwards.phd
+DJANGO_CSRF_TRUSTED_ORIGINS=https://10c.edwards.phd
+DJANGO_SECURE_SSL_REDIRECT=True
+DJANGO_SESSION_COOKIE_SECURE=True
+DJANGO_CSRF_COOKIE_SECURE=True
+```
+
 ## Useful Commands
 
 ```bash

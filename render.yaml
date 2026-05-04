@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: gcse-exam-revision
+    runtime: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn config.wsgi:application"
+    envVars:
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_ALLOWED_HOSTS
+        value: "10c.edwards.phd,gcse-exam-revision.onrender.com"
+      - key: DJANGO_CSRF_TRUSTED_ORIGINS
+        value: "https://10c.edwards.phd,https://gcse-exam-revision.onrender.com"
+      - key: DJANGO_SECURE_SSL_REDIRECT
+        value: "True"
+      - key: DJANGO_SESSION_COOKIE_SECURE
+        value: "True"
+      - key: DJANGO_CSRF_COOKIE_SECURE
+        value: "True"
+      - key: DATABASE_SSL_REQUIRE
+        value: "True"
+      - key: QUESTION_GENERATOR_PROVIDER
+        value: "local"
